@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Colorization
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NOCOLOR='\033[0m'
+
+# Check to see if the handheld scanner is connected to the computer. The string
+# can be replaced with whatever the result for 'lsusb' is for the device.
+SCAN_CONNECTED=$(lsusb | grep "Cypress Semiconductor Corp. Keyboard/Hub")
+
+if [[ -z $SCAN_CONNECTED ]]
+then
+	echo -e "${RED}Handheld scanner not detected. Is it plugged in?${NOCOLOR}"
+	exit 1
+fi
+
+# Ask for the number of stick that are being counted
+echo -e "${YELLOW}How many sticks of RAM are you scanning?${NOCOLOR}"
+read TOTAL
+
+# Scan in the first stick
+echo -e "${YELLOW}Scan in the first stick:${NOCOLOR}"
+read FIRST_STICK
+
+while [[ -z "$NEXT_STICK" ]] && [[ $TOTAL -ne 1 ]]
+do
+	# Scan in the comparison stick
+	echo -e "${YELLOW}Scan in another stick${NOCOLOR}"
+	read NEXT_STICK
+
+	if [[ $FIRST_STICK == $NEXT_STICK ]]
+	then
+		echo -e "${GREEN}Match!${NOCOLOR}"
+		unset NEXT_STICK
+		TOTAL=$TOTAL-1
+	else
+		echo -e "${RED}Does not match${NOCOLOR}"
+		unset NEXT_STICK
+		TOTAL=$TOTAL-1
+	fi
+done
